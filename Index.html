@@ -1,1 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CANTARIA — Construção de Alto Padrão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1c1b19;
+    --bg-alt:#221f1a;
+    --surface:#2a2620;
+    --surface-2:#332e26;
+    --stone:#e8e2d3;
+    --ink:#f4f1e8;
+    --muted:#a89f8c;
+    --brass:#9c7a4e;
+    --brass-light:#c9a876;
+    --line: rgba(232,226,211,0.14);
+    --line-strong: rgba(232,226,211,0.28);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  /* -------- NAV -------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:rgba(28,27,25,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:1180px;margin:0 auto;padding:20px 32px;
+  }
+  .logo{
+    font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;
+    letter-spacing:0.06em;
+  }
+  .logo span{color:var(--brass-light);}
+  .nav-links{display:flex;gap:36px;font-size:0.88rem;letter-spacing:0.02em;color:var(--muted);}
+  .nav-links a{transition:color .25s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+    border:1px solid var(--line-strong);padding:9px 18px;
+    letter-spacing:0.03em; transition:all .25s;
+  }
+  .nav-cta:hover{background:var(--brass);border-color:var(--brass);color:#1c1b19;}
+  .nav-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.5rem;cursor:pointer;}
+
+  /* -------- HERO -------- */
+  .hero{
+    position:relative;min-height:100vh;display:flex;align-items:center;
+    padding-top:100px;overflow:hidden;
+  }
+  .blueprint{
+    position:absolute;inset:0;z-index:0;opacity:0.5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(ellipse 70% 60% at 65% 40%, black 10%, transparent 75%);
+  }
+  .elevation-svg{position:absolute;right:-4%;top:8%;width:62%;max-width:720px;opacity:0.9;z-index:0;}
+  .elevation-svg path,.elevation-svg line,.elevation-svg circle{
+    stroke:var(--brass-light); stroke-width:1; fill:none; opacity:0.55;
+  }
+  .hero-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 32px;width:100%;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--brass-light);
+    letter-spacing:0.12em;text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:28px;
+  }
+  .eyebrow::before{content:'';width:28px;height:1px;background:var(--brass-light);}
+  h1.hero-title{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2.4rem,6vw,4.6rem);
+    line-height:1.06;max-width:820px;letter-spacing:-0.01em;
+  }
+  h1.hero-title em{font-style:italic;font-weight:400;color:var(--brass-light);}
+  .hero-sub{
+    margin-top:26px;max-width:480px;color:var(--muted);font-size:1.05rem;
+  }
+  .hero-actions{display:flex;gap:18px;margin-top:44px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--brass);color:#1c1b19;padding:15px 30px;font-weight:500;
+    font-size:0.92rem;letter-spacing:0.01em;transition:background .25s, transform .25s;
+    display:inline-flex;align-items:center;gap:10px;
+  }
+  .btn-primary:hover{background:var(--brass-light);transform:translateY(-1px);}
+  .btn-ghost{
+    border:1px solid var(--line-strong);padding:15px 30px;font-size:0.92rem;
+    transition:border-color .25s, background .25s;
+  }
+  .btn-ghost:hover{border-color:var(--brass-light);background:rgba(156,122,78,0.08);}
+
+  .hero-stats{
+    position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);
+    gap:1px;background:var(--line);margin-top:96px;border-top:1px solid var(--line);
+  }
+  .stat{background:var(--bg);padding:26px 8px 8px;}
+  .stat .num{font-family:'Fraunces',serif;font-size:2.1rem;font-weight:500;color:var(--brass-light);}
+  .stat .label{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);margin-top:6px;letter-spacing:0.02em;}
+
+  /* -------- SECTION GENERIC -------- */
+  section{padding:130px 0;position:relative;}
+  .section-head{max-width:640px;margin-bottom:64px;}
+  .section-head .eyebrow{margin-bottom:20px;}
+  .section-head h2{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.9rem,3.6vw,2.7rem);
+    line-height:1.14;
+  }
+  .section-head p{color:var(--muted);margin-top:18px;font-size:1rem;max-width:520px;}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease, transform .8s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  /* -------- SOBRE -------- */
+  #sobre{background:var(--bg-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .sobre-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:80px;align-items:start;}
+  .sobre-text p{color:var(--muted);margin-bottom:20px;font-size:1.02rem;max-width:520px;}
+  .sobre-text p strong{color:var(--ink);font-weight:500;}
+  .materials{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .material-card{
+    aspect-ratio:1;position:relative;overflow:hidden;border:1px solid var(--line);
+    display:flex;align-items:flex-end;padding:14px;
+  }
+  .material-card .mono{font-size:0.68rem;color:var(--stone);letter-spacing:0.04em;position:relative;z-index:2;background:rgba(0,0,0,0.25);padding:3px 7px;}
+  .m-concreto{background:linear-gradient(160deg,#7d7768,#5b5548);}
+  .m-carvalho{background:linear-gradient(160deg,#8a6a45,#5f4a30);}
+  .m-aco{background:linear-gradient(160deg,#6b6e70,#3d3f41);}
+  .m-latao{background:linear-gradient(160deg,#c9a876,#8a6a3f);}
+
+  @media(max-width:900px){.sobre-grid{grid-template-columns:1fr;gap:44px;}}
+
+  /* -------- SERVIÇOS -------- */
+  .servicos-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);}
+  .servico{
+    border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:40px 30px;transition:background .3s;
+  }
+  .servico:hover{background:var(--surface);}
+  .servico .idx{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--brass-light);}
+  .servico h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.25rem;margin:22px 0 12px;line-height:1.25;}
+  .servico p{color:var(--muted);font-size:0.92rem;}
+  @media(max-width:900px){.servicos-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.servicos-grid{grid-template-columns:1fr;}}
+
+  /* -------- PORTFÓLIO -------- */
+  #portfolio{background:var(--bg-alt);}
+  .projetos{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .projeto{background:var(--bg-alt);cursor:default;}
+  .projeto-visual{aspect-ratio:4/3;position:relative;overflow:hidden;}
+  .projeto-visual::after{content:'';position:absolute;inset:0;background:linear-gradient(200deg, transparent 40%, rgba(0,0,0,0.55));}
+  .projeto-info{padding:22px 24px 28px;}
+  .projeto-info .idx{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--brass-light);}
+  .projeto-info h3{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:500;margin:10px 0 8px;}
+  .projeto-meta{display:flex;gap:16px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .p1 .projeto-visual{background:linear-gradient(150deg,#5b5548,#332e26);}
+  .p2 .projeto-visual{background:linear-gradient(150deg,#8a6a45,#332e26);}
+  .p3 .projeto-visual{background:linear-gradient(150deg,#6b6e70,#26241f);}
+  .p4 .projeto-visual{background:linear-gradient(150deg,#403a2d,#1c1b19);}
+  .p5 .projeto-visual{background:linear-gradient(150deg,#8a7355,#26241f);}
+  .p6 .projeto-visual{background:linear-gradient(150deg,#57544a,#1c1b19);}
+  @media(max-width:900px){.projetos{grid-template-columns:1fr 1fr;}}
+  @media(max-width:600px){.projetos{grid-template-columns:1fr;}}
+
+  /* -------- DEPOIMENTOS -------- */
+  .depoimentos{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;}
+  .depoimento{border-top:2px solid var(--brass);padding-top:24px;}
+  .depoimento p.quote{font-family:'Fraunces',serif;font-style:italic;font-size:1.12rem;font-weight:400;color:var(--stone);line-height:1.5;}
+  .depoimento .autor{margin-top:20px;font-size:0.88rem;color:var(--muted);}
+  .depoimento .autor strong{color:var(--ink);display:block;font-family:'Inter';font-weight:500;}
+  @media(max-width:900px){.depoimentos{grid-template-columns:1fr;gap:36px;}}
+
+  /* -------- AVALIAÇÕES -------- */
+  .avaliacoes-grid{display:grid;grid-template-columns:0.8fr 1.2fr;gap:60px;align-items:start;}
+  .avaliacao-resumo{
+    border:1px solid var(--line-strong);padding:36px 30px;text-align:center;
+  }
+  .resumo-nota{font-family:'Fraunces',serif;font-size:3.2rem;font-weight:500;color:var(--brass-light);line-height:1;}
+  .resumo-estrelas{font-size:1.3rem;color:var(--brass-light);letter-spacing:4px;margin-top:12px;}
+  .resumo-total{margin-top:14px;color:var(--muted);font-size:0.78rem;}
+  .star-input{display:flex;gap:8px;font-size:1.9rem;line-height:1;}
+  .star-input span{color:var(--line-strong);cursor:pointer;transition:color .15s;}
+  .star-input span:hover, .star-input span.hover-active{color:var(--brass-light);}
+  .star-input span.active{color:var(--brass-light);}
+  .reviews-list{margin-top:56px;border-top:1px solid var(--line);}
+  .review-card{border-bottom:1px solid var(--line);padding:22px 0;}
+  .review-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .review-stars{color:var(--brass-light);letter-spacing:2px;font-size:0.95rem;}
+  .review-name{font-weight:500;font-size:0.92rem;}
+  .review-date{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);}
+  .review-comment{color:var(--muted);margin-top:10px;font-size:0.94rem;max-width:640px;}
+  .reviews-empty{color:var(--muted);font-size:0.92rem;padding:22px 0;}
+  @media(max-width:800px){.avaliacoes-grid{grid-template-columns:1fr;gap:36px;}}
+
+  /* -------- CONTATO -------- */
+  #contato{background:var(--bg-alt);border-top:1px solid var(--line);}
+  .contato-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:70px;}
+  .contato-info .item{margin-bottom:26px;}
+  .contato-info .item .label{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--brass-light);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+  .contato-info .item .value{font-size:1rem;color:var(--stone);}
+  form{display:flex;flex-direction:column;gap:20px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  label{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:8px;}
+  input,select,textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-strong);
+    color:var(--ink);font-family:'Inter';font-size:0.98rem;padding:10px 2px;transition:border-color .25s;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brass-light);}
+  select option{background:var(--bg);}
+  textarea{resize:vertical;min-height:90px;}
+  .form-submit{
+    margin-top:10px;align-self:flex-start;background:var(--brass);color:#1c1b19;
+    border:none;padding:15px 34px;font-family:'Inter';font-weight:500;font-size:0.92rem;
+    cursor:pointer;transition:background .25s;
+  }
+  .form-submit:hover{background:var(--brass-light);}
+  @media(max-width:800px){.contato-grid{grid-template-columns:1fr;gap:44px;}.form-row{grid-template-columns:1fr;}}
+
+  footer{
+    border-top:1px solid var(--line);padding:40px 0;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  }
+  footer .mono{font-size:0.75rem;color:var(--muted);}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .reveal{transition:none;opacity:1;transform:none;}
+  }
+
+  @media(max-width:800px){
+    .nav-links,.nav-cta{display:none;}
+    .nav-toggle{display:block;}
+    .hero-stats{grid-template-columns:repeat(2,1fr);}
+    section{padding:80px 0;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">CANTARIA<span>.</span></div>
+    <div class="nav-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#portfolio">Portfólio</a>
+      <a href="#depoimentos">Depoimentos</a>
+      <a href="#avaliacoes">Avaliações</a>
+    </div>
+    <a href="#contato" class="nav-cta">Solicitar orçamento</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="blueprint"></div>
+  <svg class="elevation-svg" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20" y1="460" x2="380" y2="460"/>
+    <line x1="60" y1="460" x2="60" y2="120"/>
+    <line x1="340" y1="460" x2="340" y2="120"/>
+    <path d="M60 120 L200 40 L340 120"/>
+    <line x1="60" y1="120" x2="340" y2="120"/>
+    <line x1="90" y1="460" x2="90" y2="200"/><line x1="90" y1="200" x2="140" y2="200"/><line x1="140" y1="200" x2="140" y2="460"/>
+    <line x1="180" y1="460" x2="180" y2="180"/><line x1="180" y1="180" x2="230" y2="180"/><line x1="230" y1="180" x2="230" y2="460"/>
+    <line x1="270" y1="460" x2="270" y2="220"/><line x1="270" y1="220" x2="310" y2="220"/><line x1="310" y1="220" x2="310" y2="460"/>
+    <circle cx="200" cy="40" r="3" fill="var(--brass-light)" stroke="none"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="eyebrow">Construção &amp; Reforma de Alto Padrão — Desde 2007</div>
+    <h1 class="hero-title">Cada obra carrega uma <em>década</em> de decisões certas.</h1>
+    <p class="hero-sub">Projetamos e construímos residências e empreendimentos que se tornam referência — do primeiro traço no papel ao último acabamento em latão.</p>
+    <div class="hero-actions">
+      <a href="#contato" class="btn-primary">Solicitar orçamento →</a>
+      <a href="#portfolio" class="btn-ghost">Ver portfólio</a>
+    </div>
+  </div>
+  <div class="wrap hero-stats">
+    <div class="stat"><div class="num">18</div><div class="label mono">ANOS DE ATUAÇÃO</div></div>
+    <div class="stat"><div class="num">140+</div><div class="label mono">OBRAS ENTREGUES</div></div>
+    <div class="stat"><div class="num">32</div><div class="label mono">PRÊMIOS E CERTIFICAÇÕES</div></div>
+    <div class="stat"><div class="num">100%</div><div class="label mono">PROJETOS NO PRAZO</div></div>
+  </div>
+</section>
+
+<section id="sobre">
+  <div class="wrap sobre-grid">
+    <div class="reveal">
+      <div class="section-head" style="margin-bottom:32px;">
+        <div class="eyebrow">Sobre a Cantaria</div>
+        <h2>Engenharia rigorosa, acabamento de artesão.</h2>
+      </div>
+      <div class="sobre-text">
+        <p>A Cantaria nasceu da união entre dois ofícios que raramente andam juntos com o mesmo rigor: <strong>a engenharia estrutural</strong> e <strong>o acabamento artesanal</strong>. Desde 2007, entregamos obras onde nenhuma das duas coisas é sacrificada em nome da outra.</p>
+        <p>Cada projeto passa pela mesma equipe do início ao fim — do estudo de solo à escolha do puxador da porta —, o que elimina os ruídos que normalmente aparecem quando uma obra passa por muitas mãos diferentes.</p>
+        <p>Trabalhamos com um número limitado de obras simultâneas por ano, de propósito. É assim que garantimos que o padrão de qualidade não varia entre o primeiro e o último projeto da temporada.</p>
+      </div>
+    </div>
+    <div class="materials reveal">
+      <div class="material-card m-concreto"><span class="mono">CONCRETO APARENTE</span></div>
+      <div class="material-card m-carvalho"><span class="mono">CARVALHO NATURAL</span></div>
+      <div class="material-card m-aco"><span class="mono">AÇO CORTEN</span></div>
+      <div class="material-card m-latao"><span class="mono">LATÃO ESCOVADO</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="servicos">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">O que fazemos</div>
+      <h2>Quatro frentes, um único padrão de exigência.</h2>
+      <p>Não somos generalistas. Cada frente abaixo tem equipe, fornecedores e processos próprios.</p>
+    </div>
+  </div>
+  <div class="servicos-grid wrap" style="padding:0;">
+    <div class="servico reveal">
+      <div class="idx mono">01</div>
+      <h3>Construção residencial de alto padrão</h3>
+      <p>Projeto e execução de residências unifamiliares, do terreno à entrega das chaves.</p>
+    </div>
+    <div class="servico reveal">
+      <div class="idx mono">02</div>
+      <h3>Reforma e retrofit arquitetônico</h3>
+      <p>Intervenções estruturais e estéticas em imóveis existentes, com respeito ao caráter original.</p>
+    </div>
+    <div class="servico reveal">
+      <div class="idx mono">03</div>
+      <h3>Empreendimentos comerciais</h3>
+      <p>Escritórios, showrooms e espaços institucionais pensados para durar além da tendência do momento.</p>
+    </div>
+    <div class="servico reveal">
+      <div class="idx mono">04</div>
+      <h3>Consultoria técnica e engenharia</h3>
+      <p>Laudos estruturais, gestão de obra e acompanhamento técnico para projetos de terceiros.</p>
+    </div>
+  </div>
+</section>
+
+<section id="portfolio">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Portfólio</div>
+      <h2>Uma seleção de obras entregues.</h2>
+      <p>Cada projeto abaixo foi acompanhado pela mesma equipe, do primeiro esboço ao último detalhe.</p>
+    </div>
+  </div>
+  <div class="wrap" style="padding:0;">
+    <div class="projetos">
+      <div class="projeto p1 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 01</div>
+          <h3>Residência Jequitibá</h3>
+          <div class="projeto-meta"><span>São Paulo, SP</span><span>2023</span><span>480 m²</span></div>
+        </div>
+      </div>
+      <div class="projeto p2 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 02</div>
+          <h3>Casa Vale do Sol</h3>
+          <div class="projeto-meta"><span>Itu, SP</span><span>2022</span><span>620 m²</span></div>
+        </div>
+      </div>
+      <div class="projeto p3 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 03</div>
+          <h3>Studio Aço &amp; Vidro</h3>
+          <div class="projeto-meta"><span>Curitiba, PR</span><span>2023</span><span>210 m²</span></div>
+        </div>
+      </div>
+      <div class="projeto p4 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 04</div>
+          <h3>Edifício Cerrado Corporate</h3>
+          <div class="projeto-meta"><span>Goiânia, GO</span><span>2021</span><span>3.100 m²</span></div>
+        </div>
+      </div>
+      <div class="projeto p5 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 05</div>
+          <h3>Retiro Serra Fria</h3>
+          <div class="projeto-meta"><span>Gonçalves, MG</span><span>2024</span><span>340 m²</span></div>
+        </div>
+      </div>
+      <div class="projeto p6 reveal">
+        <div class="projeto-visual"></div>
+        <div class="projeto-info">
+          <div class="idx">PROJ. 06</div>
+          <h3>Retrofit Vila Madalena</h3>
+          <div class="projeto-meta"><span>São Paulo, SP</span><span>2022</span><span>290 m²</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="depoimentos">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Depoimentos</div>
+      <h2>O que dizem os clientes.</h2>
+    </div>
+    <div class="depoimentos">
+      <div class="depoimento reveal">
+        <p class="quote">"Acompanhei outras três obras antes desta. Foi a única em que não precisei brigar por prazo ou por acabamento."</p>
+        <div class="autor"><strong>Marcelo A.</strong>Residência Jequitibá</div>
+      </div>
+      <div class="depoimento reveal">
+        <p class="quote">"A equipe entendeu que reforma de casa antiga não é demolir a história dela. Isso fez toda diferença no resultado."</p>
+        <div class="autor"><strong>Renata F.</strong>Retrofit Vila Madalena</div>
+      </div>
+      <div class="depoimento reveal">
+        <p class="quote">"Recebemos relatório técnico detalhado toda semana. Pela primeira vez senti que sabia exatamente o que estava pagando."</p>
+        <div class="autor"><strong>Diego P.</strong>Edifício Cerrado Corporate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="avaliacoes">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Avaliações</div>
+      <h2>O que os visitantes acham do nosso trabalho.</h2>
+      <p>Deixe sua avaliação — ela fica salva e visível para todas as pessoas que visitarem o site.</p>
+    </div>
+    <div class="avaliacoes-grid">
+      <div class="avaliacao-resumo reveal">
+        <div class="resumo-nota" id="mediaNota">—</div>
+        <div class="resumo-estrelas" id="mediaEstrelas">☆☆☆☆☆</div>
+        <div class="resumo-total mono" id="totalAvaliacoes">Carregando avaliações...</div>
+      </div>
+      <form id="reviewForm" class="reveal">
+        <div>
+          <label>Seu nome</label>
+          <input type="text" id="revNome" placeholder="Como podemos te chamar">
+        </div>
+        <div>
+          <label>Sua nota</label>
+          <div class="star-input" id="starInput">
+            <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+          </div>
+        </div>
+        <div>
+          <label>Comentário (opcional)</label>
+          <textarea id="revComentario" placeholder="Conte como foi sua experiência"></textarea>
+        </div>
+        <button type="submit" class="form-submit">Enviar avaliação</button>
+      </form>
+    </div>
+    <div class="reviews-list" id="reviewsList"></div>
+  </div>
+</section>
+
+<section id="contato">
+  <div class="wrap contato-grid">
+    <div class="reveal">
+      <div class="section-head" style="margin-bottom:0;">
+        <div class="eyebrow">Contato</div>
+        <h2>Vamos falar sobre o seu projeto.</h2>
+        <p>Preencha o formulário ou fale diretamente com nossa equipe comercial.</p>
+      </div>
+      <div class="contato-info" style="margin-top:44px;">
+        <div class="item">
+          <div class="label">Telefone</div>
+          <div class="value">(11) 3456-7890</div>
+        </div>
+        <div class="item">
+          <div class="label">E-mail</div>
+          <div class="value">contato@cantaria.com.br</div>
+        </div>
+        <div class="item">
+          <div class="label">Escritório</div>
+          <div class="value">Rua dos Pinheiros, 842 — São Paulo, SP</div>
+        </div>
+        <div class="item">
+          <div class="label">Atendimento</div>
+          <div class="value">Segunda a sexta, 9h às 18h</div>
+        </div>
+      </div>
+    </div>
+    <form class="reveal" onsubmit="event.preventDefault(); this.querySelector('.form-submit').textContent='Solicitação enviada ✓';">
+      <div class="form-row">
+        <div>
+          <label>Nome completo</label>
+          <input type="text" required placeholder="Seu nome">
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input type="tel" required placeholder="(11) 90000-0000">
+        </div>
+      </div>
+      <div>
+        <label>E-mail</label>
+        <input type="email" required placeholder="seu@email.com">
+      </div>
+      <div>
+        <label>Tipo de projeto</label>
+        <select required>
+          <option value="">Selecione uma opção</option>
+          <option>Construção residencial</option>
+          <option>Reforma / retrofit</option>
+          <option>Empreendimento comercial</option>
+          <option>Consultoria técnica</option>
+        </select>
+      </div>
+      <div>
+        <label>Conte um pouco sobre o projeto</label>
+        <textarea placeholder="Localização, metragem aproximada, prazo desejado..."></textarea>
+      </div>
+      <button type="submit" class="form-submit">Enviar solicitação</button>
+    </form>
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="mono">© 2026 CANTARIA CONSTRUÇÕES — CNPJ 00.000.000/0001-00</div>
+  <div class="mono">CREA 000000-D/SP</div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  /* -------- AVALIAÇÕES -------- */
+  function starsString(n){
+    let s='';
+    for(let i=1;i<=5;i++){ s += i<=n ? '★' : '☆'; }
+    return s;
+  }
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function formatDate(iso){
+    try{
+      return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'});
+    }catch(e){ return ''; }
+  }
+
+  async function loadReviews(){
+    try{
+      const res = await window.storage.get('reviews', true);
+      return res && res.value ? JSON.parse(res.value) : [];
+    }catch(e){
+      return [];
+    }
+  }
+  async function saveReviews(reviews){
+    try{
+      await window.storage.set('reviews', JSON.stringify(reviews), true);
+      return true;
+    }catch(e){
+      console.error('Erro ao salvar avaliação', e);
+      return false;
+    }
+  }
+
+  function renderReviews(reviews){
+    const total = reviews.length;
+    const avg = total ? reviews.reduce((a,r)=>a+r.rating,0)/total : 0;
+
+    document.getElementById('mediaNota').textContent = total ? avg.toFixed(1) : '—';
+    document.getElementById('mediaEstrelas').textContent = starsString(Math.round(avg));
+    document.getElementById('totalAvaliacoes').textContent = total
+      ? `${total} avaliaç${total>1?'ões':'ão'}`
+      : 'Seja a primeira pessoa a avaliar';
+
+    const list = document.getElementById('reviewsList');
+    list.innerHTML = '';
+    if(total === 0){
+      list.innerHTML = '<div class="reviews-empty">Ainda não há avaliações. Seu comentário aparecerá aqui.</div>';
+      return;
+    }
+    reviews.slice().reverse().forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'review-card';
+      card.innerHTML = `
+        <div class="review-top">
+          <span class="review-stars">${starsString(r.rating)}</span>
+          <span class="review-name">${escapeHtml(r.name || 'Anônimo')}</span>
+          <span class="review-date">${formatDate(r.date)}</span>
+        </div>
+        ${r.comment ? `<p class="review-comment">${escapeHtml(r.comment)}</p>` : ''}
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  let currentRating = 0;
+  const starInput = document.getElementById('starInput');
+  const starSpans = starInput.querySelectorAll('span');
+  function updateStars(hoverVal){
+    const val = hoverVal || currentRating;
+    starSpans.forEach(span=>{
+      span.classList.toggle('active', parseInt(span.dataset.v) <= val);
+    });
+  }
+  starSpans.forEach(span=>{
+    span.addEventListener('click', ()=>{
+      currentRating = parseInt(span.dataset.v);
+      updateStars();
+    });
+    span.addEventListener('mouseenter', ()=> updateStars(parseInt(span.dataset.v)));
+  });
+  starInput.addEventListener('mouseleave', ()=> updateStars());
+
+  const reviewForm = document.getElementById('reviewForm');
+  reviewForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(currentRating === 0){
+      alert('Selecione uma nota de 1 a 5 estrelas antes de enviar.');
+      return;
+    }
+    const btn = reviewForm.querySelector('.form-submit');
+    const originalText = btn.textContent;
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    const nome = document.getElementById('revNome').value.trim() || 'Anônimo';
+    const comentario = document.getElementById('revComentario').value.trim();
+
+    const reviews = await loadReviews();
+    reviews.push({ name: nome, rating: currentRating, comment: comentario, date: new Date().toISOString() });
+    const ok = await saveReviews(reviews);
+
+    if(ok){
+      renderReviews(reviews);
+      reviewForm.reset();
+      currentRating = 0;
+      updateStars();
+      btn.textContent = 'Avaliação enviada ✓';
+    } else {
+      btn.textContent = 'Erro, tente novamente';
+    }
+    setTimeout(()=>{ btn.textContent = originalText; btn.disabled = false; }, 2500);
+  });
+
+  (async ()=>{
+    const reviews = await loadReviews();
+    renderReviews(reviews);
+  })();
+</script>
+
+</body>
+</html>
 
