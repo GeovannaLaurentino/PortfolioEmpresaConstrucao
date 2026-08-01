@@ -50,7 +50,14 @@
     letter-spacing:0.03em; transition:all .25s;
   }
   .nav-cta:hover{background:var(--brass);border-color:var(--brass);color:#1c1b19;}
+  .nav-right{display:flex;align-items:center;gap:20px;}
+  .social-link{
+    color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
+    transition:color .25s, transform .25s;
+}
+  .social-link:hover{color:var(--brass-light);transform:translateY(-1px);}
   .nav-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.5rem;cursor:pointer;}
+
 
   /* -------- HERO -------- */
   .hero{
