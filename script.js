@@ -163,11 +163,13 @@
     setTimeout(()=>{ btn.textContent = originalText; btn.disabled = false; }, 2500);
   });
 
-  /* -------- MODO PROPRIETÁRIO -------- */
-  // Senha simples de moderação — troque por algo só seu antes de publicar o site.
-  // Isso não é uma autenticação segura de servidor, apenas uma trava básica
-  // para evitar que qualquer visitante exclua ou responda avaliações.
-  const OWNER_PASSWORD = 'cantaria2026';
+
+  const OWNER_PASSWORD_HASH = '6043958a9669318e740349f1d7f6a22f445ab3097cea82c2da5f236f04b619cc';
+
+  async function sha256(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
 
   const ownerToggle = document.getElementById('ownerToggle');
   const ownerLogin = document.getElementById('ownerLogin');
@@ -180,8 +182,9 @@
     if(ownerLogin.classList.contains('open')) ownerPasswordInput.focus();
   });
 
-  function tryOwnerLogin(){
-    if(ownerPasswordInput.value === OWNER_PASSWORD){
+  async function tryOwnerLogin(){
+    const hash = await sha256(ownerPasswordInput.value);
+    if(hash === OWNER_PASSWORD_HASH){
       document.body.classList.add('is-owner');
       ownerBadge.style.display = 'inline-block';
       ownerPasswordInput.style.display = 'none';
