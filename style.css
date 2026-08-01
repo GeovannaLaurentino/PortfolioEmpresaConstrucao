@@ -57,7 +57,17 @@
 }
   .social-link:hover{color:var(--brass-light);transform:translateY(-1px);}
   .nav-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.5rem;cursor:pointer;}
+  /* Instagram do topo */
+  nav .social-link svg{
+    width:16px;
+    height:16px;
+}
 
+  /* Instagram do rodapé */
+  footer .social-link svg{
+    width:14px;
+    height:14px;
+}
 
   /* -------- HERO -------- */
   .hero{
