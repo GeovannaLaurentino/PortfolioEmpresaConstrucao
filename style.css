@@ -50,7 +50,7 @@
     letter-spacing:0.03em; transition:all .25s;
   }
   .nav-cta:hover{background:var(--brass);border-color:var(--brass);color:#1c1b19;}
-  .nav-right{display:flex;align-items:center;gap:20px;}
+  .nav-right{display:flex;align-items:center;gap:35px;}
   .social-link{
     color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
     transition:color .25s, transform .25s;
@@ -67,6 +67,7 @@
   footer .social-link svg{
     width:14px;
     height:14px;
+    margin-top:10px
 }
 
   /* -------- HERO -------- */
